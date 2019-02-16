@@ -1,4 +1,4 @@
-TAG	:= 6.6.0
+TAG := 6.6.0
 STACK_NAME := $(or $(STACK_NAME), elastic)
 SWARM_MASTER := node-m
 

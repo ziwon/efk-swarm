@@ -4,7 +4,6 @@ NUM_NODES=${NUM_NODES:-3}
 VBOX_MEMORY=${VBOX_MEMORY:-2048}
 VBOX_CPUS=${VBOX_CPUS:-1}
 OVERLAY_SUBNET="10.10.0.0/24"
-KAFKA_ENABLED=0
 
 echo "Creating virtualbox.."
 for i in m $(seq "${NUM_NODES}"); do
