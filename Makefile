@@ -1,4 +1,3 @@
-TAG := 6.6.0
 STACK_NAME := $(or $(STACK_NAME), elastic)
 SWARM_MASTER := node-m
 
@@ -37,7 +36,7 @@ swarm-node: swarm-env
 	@docker node ls
 
 stack-deploy: swarm-env
-	@TAG=$(TAG) docker stack deploy -c docker-compose.yml $(STACK_NAME)
+	@docker stack deploy -c docker-compose.yml $(STACK_NAME)
 
 stack-service: swarm-env
 	@docker stack services $(STACK_NAME)
