@@ -1,5 +1,5 @@
-SWARM_MASTER = node-m
-STACK_NAME := elastic
+include .env
+export
 
 define docker-env
 $(foreach val, $(shell docker-machine env $1 | sed -e '/^#/d' -e 's/"//g'), $(eval $(val)))
@@ -54,6 +54,3 @@ kibana:
 	@open http://$(call get-node-ip, node-1)
 
 .PHONY: swarm-env swarm-up swarm-done swarm-remove-volume swarm-viz swarm-node stack-deploy stack-service stack-ps stack-logs stack-remove kibana
-
-include .env
-export
