@@ -1,0 +1,158 @@
+version: "3.7"
+
+services:
+  viz:
+    image: dockersamples/visualizer
+    hostname: swarm-viz
+    networks:
+      - overnet
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - CTX_ROOT=/viz
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+      labels:
+        - com.df.notify=true
+        - com.df.distribute=true
+        - com.df.servicePath=/viz
+        - com.df.port=8080
+
+  listener:
+    image: dockerflow/docker-flow-swarm-listener:latest
+    hostname: swarm-listener
+    networks:
+      - overnet
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - DF_NOTIFY_CREATE_SERVICE_URL=http://proxy:8080/v1/docker-flow-proxy/reconfigure
+      - DF_NOTIFY_REMOVE_SERVICE_URL=http://proxy:8080/v1/docker-flow-proxy/remove
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+
+  proxy:
+    image: dockerflow/docker-flow-proxy:latest
+    hostname: proxy
+    ports:
+      - "80:80"
+      - "443:443"
+      - "9200:9200"
+    networks:
+      - overnet
+    environment:
+      - LISTENER_ADDRESS=listener
+      - MODE=swarm
+      - BIND_PORTS=9200
+
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:${TAG:-6.5.4}
+    hostname: "{{.Node.Hostname}}-elasticsearch"
+    environment:
+      - cluster.name=es_cluster
+      - discovery.zen.ping.unicast.hosts=elasticsearch
+      - discovery.zen.minimum_master_nodes=1
+      - node.name={{.Node.Hostname}}-elasticsearch
+      - network.host=0.0.0.0
+      - "ES_JAVA_OPTS=-Xms${ES_JVM_HEAP} -Xmx${ES_JVM_HEAP}"
+    networks:
+      - overnet
+    volumes:
+      - elasticsearch:/usr/share/elasticsearch/data
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+    deploy:
+      endpoint_mode: dnsrr
+      placement:
+        constraints:
+          - node.labels.backend == true
+      replicas: 2
+      resources:
+        limits:
+          memory: 2g
+      labels:
+        - com.df.notify=true
+        - com.df.distribute=true
+        - com.df.servicePath=/
+        - com.df.port=9200
+        - com.df.srcPort=9200
+        - com.df.reqMode=http
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:${TAG:-6.5.4}
+    hostname: "{{.Node.Hostname}}-kibana"
+    environment:
+      - ELASTICSEARCH_HOST=elasticsearch:9200
+      - SERVER_NAME="{{.Node.Hostname}}-kibana"
+    networks:
+      - overnet
+    volumes:
+      - kibana:/usr/share/kibana/data
+    deploy:
+      placement:
+        constraints:
+          - node.labels.frontend == true
+      labels:
+        - com.df.notify=true
+        - com.df.distribute=true
+        - com.df.servicePath=/
+        - com.df.port=5601
+        - com.df.srcPort=80
+        - com.df.reqMode=http
+
+  metricbeat:
+    image: docker.elastic.co/beats/metricbeat:${TAG:-6.5.4}
+    hostname: "{{.Node.Hostname}}-metricbeat"
+    user: root
+    networks:
+      - overnet
+    volumes:
+      - ./config/beats/metricbeat/metricbeat.yml:/usr/share/metricbeat/metricbeat.yml
+      - ./config/beats/metricbeat/modules.d/:/usr/share/metricbeat/modules.d/
+      - metricbeat:/usr/share/metricbeat/data
+      - /proc:/hostfs/proc:ro
+      - /sys/fs/cgroup:/hostfs/sys/fs/cgroup:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /:/hostfs:ro
+    command: >
+      sh -c "until curl -s -k http://kibana:5601; do echo \"Waiting for kibana..\"; sleep 2; done; \
+             metricbeat -e --strict.perms=false --system.hostfs=/hostfs"
+    deploy:
+      mode: global
+
+  filebeat:
+    image: docker.elastic.co/beats/filebeat:${TAG:-6.5.4}
+    hostname: "{{.Node.Hostname}}-filebeat"
+    user: root
+    networks:
+      - overnet
+    volumes:
+      - ./config/beats/filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml
+      - ./config/beats/filebeat/modules.d/:/usr/share/filebeat/modules.d/
+      - filebeat:/usr/share/filebeat/data
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /var/lib/docker/containers/:/var/lib/docker/containers/:ro
+      - /var/log/:/var/log/:ro
+    command: >
+      sh -c "until curl -s -k http://kibana:5601; do echo \"Waiting for kibana..\"; sleep 2; done; \
+             filebeat -e --strict.perms=false"
+    deploy:
+      mode: global
+
+networks:
+  overnet:
+    external: true
+
+volumes:
+  elasticsearch:
+  kibana:
+  metricbeat:
+  filebeat:

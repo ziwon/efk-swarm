@@ -1,0 +1,33 @@
+filebeat.config.modules:
+  path: ${path.config}/modules.d/*.yml
+  reload.enabled: true
+  reload.period: 10s
+
+filebeat.inputs:
+  - type: log
+    paths:
+      - /var/log/*.log
+      - /var/log/**/*.log
+
+processors:
+  - add_host_metadata: ~
+  - add_docker_metadata:
+      host: "unix:///var/run/docker.sock"
+
+filebeat.autodiscover:
+  providers:
+    - type: docker
+      hints.enabled: true
+
+setup.template.settings:
+  index.number_of_shards: 2
+  index.codec: best_compression
+
+setup.dashboards.enabled: true
+
+setup.kibana:
+  host: "kibana:5601"
+
+output.elasticsearch:
+  hosts:
+    - "elasticsearch:9200"

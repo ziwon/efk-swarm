@@ -1,0 +1,9 @@
+- module: system
+
+  syslog:
+    enabled: true
+    var.convert_timezone: true
+
+  auth:
+    enabled: true
+    var.convert_timezone: true

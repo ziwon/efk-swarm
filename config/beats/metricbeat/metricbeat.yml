@@ -1,0 +1,28 @@
+metricbeat.config.modules:
+  path: ${path.config}/modules.d/*.yml
+  reload.enabled: false
+  reload.period: 10s
+
+metricbeat.autodiscover:
+  providers:
+    - type: docker
+      hints.enabled: true
+
+processors:
+  - add_docker_metadata: ~
+  - add_locale:
+      format: offset
+  - add_host_metadata:
+      netinfo.enabled: true
+
+setup.template.settings:
+  index.number_of_shards: 2
+  index.codec: best_compression
+
+setup.dashboards.enabled: true
+
+setup.kibana:
+  host: "kibana:5601"
+output.elasticsearch:
+  hosts:
+    - "elasticsearch:9200"

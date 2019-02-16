@@ -1,0 +1,28 @@
+- module: elasticsearch
+
+  server:
+    enabled: true
+    var.paths:
+      - /var/log/elasticsearch/*.log
+
+  gc:
+    enabled: true
+    var.paths:
+      - /var/log/elasticsearch/gc.log.[0-9]*
+      - /var/log/elasticsearch/gc.log
+
+  audit:
+    enabled: true
+    var.paths:
+      - /var/log/elasticsearch/*_access.log
+
+  slowlog:
+    enabled: true
+    var.paths:
+      - /var/log/elasticsearch/*_index_search_slowlog.log
+      - /var/log/elasticsearch/*_index_indexing_slowlog.log
+
+  deprecation:
+    enabled: true
+    var.paths:
+      - /var/log/elasticsearch/*_deprecation.log
