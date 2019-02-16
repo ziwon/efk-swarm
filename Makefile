@@ -1,5 +1,5 @@
-STACK_NAME := $(or $(STACK_NAME), elastic)
-SWARM_MASTER := node-m
+SWARM_MASTER = node-m
+STACK_NAME := elastic
 
 define docker-env
 $(foreach val, $(shell docker-machine env $1 | sed -e '/^#/d' -e 's/"//g'), $(eval $(val)))
