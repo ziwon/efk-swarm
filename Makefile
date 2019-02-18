@@ -1,5 +1,4 @@
-include .env
-export
+SWARM_MASTER := node-m
 
 define docker-env
 $(foreach val, $(shell docker-machine env $1 | sed -e '/^#/d' -e 's/"//g'), $(eval $(val)))
@@ -10,8 +9,8 @@ $(shell docker-machine ip $1)
 endef
 
 ifeq (stack-logs, $(firstword $(MAKECMDGOALS)))
-  SERVICE := $(wordlist 2, $(words $(MAKECMDGOALS)), $(MAKECMDGOALS))
-  $(eval $(SERVICE):;@:)
+	SERVICE := $(wordlist 2, $(words $(MAKECMDGOALS)), $(MAKECMDGOALS))
+	$(eval $(SERVICE):;@:)
 endif
 
 swarm-env:
