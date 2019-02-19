@@ -1,5 +1,11 @@
 # beats-swarm
 
+## Visualizations
+
+<img src="images/swarm-viz.png" />
+<img src="images/metricbeats-system-dashboard.png" />
+<img src="images/metricbeats-container-dashboard.png" />
+
 ## Usage
 
 ### swarm cluster up
