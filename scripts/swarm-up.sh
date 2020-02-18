@@ -36,7 +36,9 @@ docker node update --label-add backend=true node-3
 echo "Increating the limits on mmap.."
 # https://www.elastic.co/guide/en/elasticsearch/reference/current/vm-max-map-count.html
 for i in $(seq "${NUM_NODES}"); do
-	docker-machine ssh node-${i} sudo sysctl -w vm.max_map_count=262144
+	docker-machine ssh node-${i} "sudo sysctl -w vm.max_map_count=1048575 ;\
+		sudo echo 'ulimit -n 262144' >> /etc/profile ;\
+		"
 done
 
 echo -e "\n>> The Swarm Cluster is set up!"

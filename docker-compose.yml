@@ -42,13 +42,13 @@ services:
       - "80:80"
       - "443:443"
       - "9200:9200"
+      - "8200:8200"
     networks:
       - overnet
     environment:
       - LISTENER_ADDRESS=listener
       - MODE=swarm
       - BIND_PORTS=9200
-
     deploy:
       placement:
         constraints:
@@ -58,18 +58,23 @@ services:
     image: docker.elastic.co/elasticsearch/elasticsearch:${TAG:-6.5.4}
     hostname: "{{.Node.Hostname}}-elasticsearch"
     environment:
-      - cluster.name=es_cluster
-      - discovery.zen.ping.unicast.hosts=elasticsearch
-      - discovery.zen.minimum_master_nodes=1
+      - MAX_LOCKED_MEMORY=unlimited
       - node.name={{.Node.Hostname}}-elasticsearch
-      - network.host=0.0.0.0
+      - discovery.seed_hosts=elasticsearch
+      - cluster.name=es_cluster
+      - cluster.initial_master_nodes=node-2-elasticsearch,node-3-elasticsearch
       - "ES_JAVA_OPTS=-Xms${ES_JVM_HEAP} -Xmx${ES_JVM_HEAP}"
+      - network.host=0.0.0.0
+      - xpack.security.enabled=false
+      - xpack.monitoring.collection.enabled=true
+      - xpack.license.self_generated.type=trial
     networks:
       - overnet
     volumes:
       - elasticsearch:/usr/share/elasticsearch/data
       - /sys/fs/cgroup:/sys/fs/cgroup:ro
     deploy:
+      #mode: 'global'
       endpoint_mode: dnsrr
       placement:
         constraints:
@@ -77,7 +82,7 @@ services:
       replicas: 2
       resources:
         limits:
-          memory: 2g
+          memory: 8g
       labels:
         - com.df.notify=true
         - com.df.distribute=true
@@ -106,6 +111,27 @@ services:
         - com.df.servicePath=/
         - com.df.port=5601
         - com.df.srcPort=80
+        - com.df.reqMode=http
+
+  apm-server:
+    image: docker.elastic.co/apm/apm-server:${TAG:-6.5.4}
+    environment:
+      - output.elasticsearch.hosts=http://elasticsearch:9200
+      - apm-server.host=0.0.0.0:8200
+      - apm-server.secret_token=xxVpmQB2HMzCL9PgBHVrnxjNXXw5J7bd79DFm6sjBJR5HPXDhcF8MSb3vv4bpg44
+      - setup.kibana.host=kibana:5601
+      - setup.template.enabled=true
+      - logging.to_files=false
+    deploy:
+      placement:
+        constraints:
+          - node.labels.backend == true
+      labels:
+        - com.df.notify=true
+        - com.df.distribute=true
+        - com.df.servicePath=/
+        - com.df.port=8200
+        - com.df.srcPort=8200
         - com.df.reqMode=http
 
   metricbeat:
