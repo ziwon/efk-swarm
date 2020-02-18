@@ -1,4 +1,5 @@
-SWARM_MASTER := node-m
+include .env
+export
 
 define docker-env
 $(foreach val, $(shell docker-machine env $1 | sed -e '/^#/d' -e 's/"//g'), $(eval $(val)))
@@ -7,11 +8,6 @@ endef
 define get-node-ip
 $(shell docker-machine ip $1)
 endef
-
-ifeq (stack-logs, $(firstword $(MAKECMDGOALS)))
-	SERVICE := $(wordlist 2, $(words $(MAKECMDGOALS)), $(MAKECMDGOALS))
-	$(eval $(SERVICE):;@:)
-endif
 
 swarm-env:
 	$(call docker-env, $(SWARM_MASTER))
@@ -43,6 +39,10 @@ stack-service: swarm-env
 stack-ps: swarm-env
 	@docker stack ps --no-trunc $(STACK_NAME)
 
+ifeq (stack-logs,$(firstword $(MAKECMDGOALS)))
+  SERVICE := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
+  $(eval $(SERVICE):;@:)
+endif
 stack-logs: swarm-env
 	@docker service logs -f $(STACK_NAME)_$(SERVICE)
 
