@@ -1,3 +1,6 @@
+SHELL := $(shell which bash)
+.SILENT: ;               # no need for @
+
 include .env
 export
 
@@ -9,47 +12,47 @@ define get-node-ip
 $(shell docker-machine ip $1)
 endef
 
-swarm-env:
+node-env:
 	$(call docker-env, $(SWARM_MASTER))
 
-swarm-up:
-	@./scripts/swarm-up.sh
+node-up:
+	./scripts/swarm-up.sh
 
-swarm-down:
-	@docker-machine ls --format '{{.Name}}' | xargs -I {} docker-machine rm -f -y {} 2>/dev/null
+node-down:
+	docker-machine ls --format '{{.Name}}' | xargs -I {} docker-machine rm -f -y {} 2>/dev/null
 
-swarm-remove-volume: swarm-env
-	@for node in $$(docker node ls --format '{{.Hostname}}'); do \
+node-cleanup: node-env
+	for node in $$(docker node ls --format '{{.Hostname}}'); do \
 		eval $$(docker-machine env $$node); \
 		yes | docker volume prune; \
 	done
 
-swarm-viz:
-	@open http://$(call get-node-ip, node-1)/viz
+node-viz:
+	open http://$(call get-node-ip, node-1)/viz
 
-swarm-node: swarm-env
-	@docker node ls
+node-status: node-env
+	docker node ls
 
-stack-deploy: swarm-env
-	@docker stack deploy -c docker-compose.yml $(STACK_NAME)
+stack-start: node-env
+	docker stack deploy -c docker-compose.yml $(STACK_NAME)
 
-stack-service: swarm-env
-	@docker stack services $(STACK_NAME)
+stack-service: node-env
+	docker stack services $(STACK_NAME)
 
-stack-ps: swarm-env
-	@docker stack ps --no-trunc $(STACK_NAME)
+stack-ps: node-env
+	docker stack ps --no-trunc $(STACK_NAME)
 
 ifeq (stack-logs,$(firstword $(MAKECMDGOALS)))
   SERVICE := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
   $(eval $(SERVICE):;@:)
 endif
-stack-logs: swarm-env
-	@docker service logs -f $(STACK_NAME)_$(SERVICE)
+stack-logs: node-env
+	docker service logs -f $(STACK_NAME)_$(SERVICE)
 
-stack-remove: swarm-env
-	@docker stack rm $(STACK_NAME)
+stack-stop: node-env
+	docker stack rm $(STACK_NAME)
 
 kibana:
-	@open http://$(call get-node-ip, node-1)
+	open http://$(call get-node-ip, node-1)
 
-.PHONY: swarm-env swarm-up swarm-done swarm-remove-volume swarm-viz swarm-node stack-deploy stack-service stack-ps stack-logs stack-remove kibana
+.PHONY: node-env node-up node-down node-cleanup node-viz node-status stack-start stack-service stack-ps stack-logs stack-stop kibana

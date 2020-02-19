@@ -8,10 +8,10 @@
 
 ## Usage
 
-### swarm cluster up
+### node-up
 
 ```
-$ make swarm-up
+$ make node-up
 Creating virtualbox..
 Running pre-create checks...
 Creating machine...
@@ -40,10 +40,165 @@ Creating machine...
 (node-1) Starting the VM...
 (node-1) Check network to re-create if needed...
 (node-1) Waiting for an IP...
-...
+Waiting for machine to be running, this may take a few minutes...
+Detecting operating system of created instance...
+Waiting for SSH to be available...
+Detecting the provisioner...
+Provisioning with boot2docker...
+Copying certs to the local machine directory...
+Copying certs to the remote machine...
+Setting Docker configuration on the remote daemon...
+Checking connection to Docker...
+Docker is up and running!
+To see how to connect your Docker Client to the Docker Engine running on this virtual machine, run: docker-machine env node-1
+Running pre-create checks...
+Creating machine...
+(node-2) Copying /Users/luno/.docker/machine/cache/boot2docker.iso to /Users/luno/.docker/machine/machines/node-2/boot2docker.iso...
+(node-2) Creating VirtualBox VM...
+(node-2) Creating SSH key...
+(node-2) Starting the VM...
+(node-2) Check network to re-create if needed...
+(node-2) Waiting for an IP...
+Waiting for machine to be running, this may take a few minutes...
+Detecting operating system of created instance...
+Waiting for SSH to be available...
+Detecting the provisioner...
+Provisioning with boot2docker...
+Copying certs to the local machine directory...
+Copying certs to the remote machine...
+Setting Docker configuration on the remote daemon...
+Checking connection to Docker...
+Docker is up and running!
+To see how to connect your Docker Client to the Docker Engine running on this virtual machine, run: docker-machine env node-2
+Running pre-create checks...
+Creating machine...
+(node-3) Copying /Users/luno/.docker/machine/cache/boot2docker.iso to /Users/luno/.docker/machine/machines/node-3/boot2docker.iso...
+(node-3) Creating VirtualBox VM...
+(node-3) Creating SSH key...
+(node-3) Starting the VM...
+(node-3) Check network to re-create if needed...
+(node-3) Waiting for an IP...
+Waiting for machine to be running, this may take a few minutes...
+Detecting operating system of created instance...
+Waiting for SSH to be available...
+Detecting the provisioner...
+Provisioning with boot2docker...
+Copying certs to the local machine directory...
+Copying certs to the remote machine...
+Setting Docker configuration on the remote daemon...
+Checking connection to Docker...
+Docker is up and running!
+To see how to connect your Docker Client to the Docker Engine running on this virtual machine, run: docker-machine env node-3
+Initializing Swarm..
+Swarm initialized: current node (s4yfwil9raubyq7gy5vg3ki8f) is now a manager.
+
+To add a worker to this swarm, run the following command:
+
+    docker swarm join --token SWMTKN-1-15dmu6b4uyjumanpc8lltwoca06r8fy9wqx1qq0pm0eydbyl4p-c0hlq9xdoc33xyww4sv7pb8sp 192.168.99.117:2377
+
+To add a manager to this swarm, run 'docker swarm join-token manager' and follow the instructions.
+
+This node joined a swarm as a worker.
+This node joined a swarm as a worker.
+This node joined a swarm as a worker.
+Creating overlay network..
+xz9em7ep7rwpntq6vusc8t95o
+Adding labels for each node..
+node-1
+node-2
+node-3
+node-1
+node-2
+node-3
+node-m
+Increating the limits on mmap..
+vm.max_map_count = 1048575
+vm.max_map_count = 1048575
+vm.max_map_count = 1048575
+
+>> The Swarm Cluster is set up!
 ```
 
-### swarm cluster down
+### node-status
+
+```
+$ make node-status
+ID                            HOSTNAME            STATUS              AVAILABILITY        MANAGER STATUS      ENGINE VERSION
+rd8dl0gh6w59jl8v615vvolkx     node-1              Ready               Active                                  19.03.5
+qlb141falll4lvfh4an0sydzb     node-2              Ready               Active                                  19.03.5
+ildnkdnzqxlc1yiry4avsfe9g     node-3              Ready               Active                                  19.03.5
+s4yfwil9raubyq7gy5vg3ki8f *   node-m              Ready               Active              Leader              19.03.5
+```
+
+### stack-start
+```
+$ make stack-start
+Creating service swarm_fluent_bit
+Creating service swarm_viz
+Creating service swarm_listener
+Creating service swarm_proxy
+Creating service swarm_elasticsearch
+Creating service swarm_kibana
+Creating service swarm_apm_server
+```
+
+### stack-ps
+```
+$ make stack-ps
+ID                          NAME                    IMAGE                                                                                                                         NODE                DESIRED STATE       CURRENT STATE                ERROR               PORTS
+4j65m14x18jbsrh7j0qr592hh   swarm_apm_server.1      docker.elastic.co/apm/apm-server:7.6.0@sha256:d9812d400d3540d04c45460659a050d2064ba6fa264b05936ab0de9b47e004da                node-2              Running             Running about a minute ago                       
+at3b8yw5qdae5pirikpq6nuzl   swarm_kibana.1          docker.elastic.co/kibana/kibana:7.6.0@sha256:2cb31b8d865b4ccc93ca72d4f23d338daacc06fb18dda8dec3f2e8e28e151743                 node-1              Running             Running 53 seconds ago                           
+d21mlfk8famp17br5d9atety5   swarm_elasticsearch.1   docker.elastic.co/elasticsearch/elasticsearch:7.6.0@sha256:fb37d2e15d897b32bef18fed6050279f68a76d8c4ea54c75e37ecdbe7ca10b4b   node-3              Running             Running about a minute ago                       
+ktzo4lsta3lvku6wh448i9ptq   swarm_proxy.1           dockerflow/docker-flow-proxy:latest@sha256:d51fcf532c3e4d5926c4743195ad700e517e5cb31a36fd0c46d9ac35853fd34e                   node-m              Running             Running about a minute ago                       
+44ollbbah9rpu5u1pgbydj8te   swarm_listener.1        dockerflow/docker-flow-swarm-listener:latest@sha256:480b92ca36fe4326a97a5adbfbebdf56eefbb32b6e66cad6120a7e32492acadc          node-m              Running             Running about a minute ago                       
+7q61uthjrutz94gdewsc4ik1e   swarm_viz.1             dockersamples/visualizer:latest@sha256:54d65cbcbff52ee7d789cd285fbe68f07a46e3419c8fcded437af4c616915c85                       node-m              Running             Running about a minute ago                       
+axklfmuykncc2ilnzvqbatkzu   swarm_fluent_bit.1      fluent/fluent-bit:1.3@sha256:1402ed150af782796fccb5cbf4ea5056aad03cde3230bb6c730f1e4d21f13347                                 node-1              Running             Running 2 minutes ago                            
+g5cc2cqypymhzmxabz4ivp3f2   swarm_elasticsearch.2   docker.elastic.co/elasticsearch/elasticsearch:7.6.0@sha256:fb37d2e15d897b32bef18fed6050279f68a76d8c4ea54c75e37ecdbe7ca10b4b   node-2              Running             Running about a minute ago                       
+```
+
+### stack-service
+```
+$ make stack-service
+ID                  NAME                  MODE                REPLICAS            IMAGE                                                 PORTS
+5wcgv41vcscd        swarm_elasticsearch   replicated          2/2                 docker.elastic.co/elasticsearch/elasticsearch:7.6.0   
+66f754wze3kx        swarm_listener        replicated          1/1                 dockerflow/docker-flow-swarm-listener:latest          
+b0t0rlj6zuqn        swarm_kibana          replicated          1/1                 docker.elastic.co/kibana/kibana:7.6.0                 
+l3y5utxxv6ee        swarm_fluent_bit      replicated          1/1                 fluent/fluent-bit:1.3                                 
+n1ityg1oh8j4        swarm_viz             replicated          1/1                 dockersamples/visualizer:latest                       
+urd63l5szuf6        swarm_apm_server      replicated          1/1                 docker.elastic.co/apm/apm-server:7.6.0                
+wfkkxugx8rwq        swarm_proxy           replicated          1/1                 dockerflow/docker-flow-proxy:latest                   *:80->80/tcp, *:443->443/tcp, *:8200->8200/tcp, *:9200->9200/tcp
+```
+
+### stack-logs
+
+
+```
+$ make stack-logs fluent_bit
+swarm_fluent_bit.1.n59usrbj3sv8@node-1    | Fluent Bit v1.3.6
+swarm_fluent_bit.1.n59usrbj3sv8@node-1    | Copyright (C) Treasure Data
+swarm_fluent_bit.1.n59usrbj3sv8@node-1    |
+swarm_fluent_bit.1.n59usrbj3sv8@node-1    | [2020/02/19 18:24:30] [ info] [storage] initializing...
+swarm_fluent_bit.1.n59usrbj3sv8@node-1    | [2020/02/19 18:24:30] [ info] [storage] in-memory
+swarm_fluent_bit.1.n59usrbj3sv8@node-1    | [2020/02/19 18:24:30] [ info] [storage] normal synchronization mode, checksum disabled, max_chunks_up=128
+swarm_fluent_bit.1.n59usrbj3sv8@node-1    | [2020/02/19 18:24:30] [ info] [engine] started (pid=1)
+swarm_fluent_bit.1.n59usrbj3sv8@node-1    | [2020/02/19 18:24:30] [ info] [http_server] listen iface=0.0.0.0 tcp_port=2020
+swarm_fluent_bit.1.n59usrbj3sv8@node-1    | [2020/02/19 18:24:30] [ info] [sp] stream processor started
+```
+
+### stack-stop
+```
+$ make stack-stop
+Removing service swarm_apm_server
+Removing service swarm_elasticsearch
+Removing service swarm_flog
+Removing service swarm_fluent_bit
+Removing service swarm_kibana
+Removing service swarm_listener
+Removing service swarm_proxy
+Removing service swarm_viz
+```
+
+### node-down
 ```
 $ make swarm-down
 About to remove node-1
@@ -60,105 +215,9 @@ WARNING: This action will delete both local reference and remote instance.
 Successfully removed node-m
 ```
 
-### stack deploy
+### node-cleanup
 ```
-$ make stack-deploy
-Creating service swarm_elasticsearch
-Creating service swarm_kibana
-Creating service swarm_metricbeat
-Creating service swarm_filebeat
-Creating service swarm_viz
-Creating service swarm_listener
-Creating service swarm_proxy
-```
-
-### stack process monitoring
-```
-$ watch make stack-ps
-Every 2.0s: make stack-ps                                                                                                                                                                    lunos-MacBook-Pro.local: Sat Feb 16 12:33:29 2019
-
-ID                          NAME                                             IMAGE                                                                                                                         NODE                DESIRED STATE
-     CURRENT STATE            ERROR                       PORTS
-fb037wmhpsz3et59qcpibgphr   swarm_filebeat.nes0yn0jnqtk8ebbgmepbml4x         docker.elastic.co/beats/filebeat:6.6.0@sha256:b2d8bec6dec4f2516b2dfba5481b655ee08adabd5d22e68667a38ae4f2e029d9                node-2              Running
-     Running 21 minutes ago
-0u2kjwmdih7wijppbjsfxgy4z   swarm_metricbeat.nes0yn0jnqtk8ebbgmepbml4x       docker.elastic.co/beats/metricbeat:6.6.0@sha256:5e0f78bcc95d81f956abf7817a347548e8178389edd4821f24b53c07ec60e301              node-2              Running
-     Running 21 minutes ago
-9tx31ly1mnfh733li6q9u5sfl   swarm_filebeat.o1i0uh15b2034z509g8ig2jvx         docker.elastic.co/beats/filebeat:6.6.0@sha256:b2d8bec6dec4f2516b2dfba5481b655ee08adabd5d22e68667a38ae4f2e029d9                node-1              Running
-     Running 21 minutes ago
-o1ud3xc68rylfqiui09ir6zzk   swarm_filebeat.kolvqlj8z105ki1mtpz99yixm         docker.elastic.co/beats/filebeat:6.6.0@sha256:b2d8bec6dec4f2516b2dfba5481b655ee08adabd5d22e68667a38ae4f2e029d9                node-3              Running
-     Running 21 minutes ago
-hjofe5sbfqcg5m2ue6o7in3wz   swarm_metricbeat.o1i0uh15b2034z509g8ig2jvx       docker.elastic.co/beats/metricbeat:6.6.0@sha256:5e0f78bcc95d81f956abf7817a347548e8178389edd4821f24b53c07ec60e301              node-1              Running
-     Running 21 minutes ago
-8esow33bwwa3if5yhw4jgowu5   swarm_metricbeat.kolvqlj8z105ki1mtpz99yixm       docker.elastic.co/beats/metricbeat:6.6.0@sha256:5e0f78bcc95d81f956abf7817a347548e8178389edd4821f24b53c07ec60e301              node-3              Running
-     Running 21 minutes ago
-6n87vqvtggf5lmx9leflmhrxc    \_ swarm_metricbeat.kolvqlj8z105ki1mtpz99yixm   docker.elastic.co/beats/metricbeat:6.6.0@sha256:5e0f78bcc95d81f956abf7817a347548e8178389edd4821f24b53c07ec60e301              node-3              Shutdown
-     Failed 21 minutes ago    "task: non-zero exit (1)"
-z5vk45s0hpfux4oo2ha9qcih7   swarm_metricbeat.nes0yn0jnqtk8ebbgmepbml4x       docker.elastic.co/beats/metricbeat:6.6.0@sha256:5e0f78bcc95d81f956abf7817a347548e8178389edd4821f24b53c07ec60e301              node-2              Shutdown
-     Failed 21 minutes ago    "task: non-zero exit (1)"
-portqnxjc2atyvg2uspvkm52p   swarm_metricbeat.o1i0uh15b2034z509g8ig2jvx       docker.elastic.co/beats/metricbeat:6.6.0@sha256:5e0f78bcc95d81f956abf7817a347548e8178389edd4821f24b53c07ec60e301              node-1              Shutdown
-     Failed 21 minutes ago    "task: non-zero exit (1)"
-```
-
-### stack service monitoring
-```
-$ watch make stack-service
-Every 2.0s: make stack-service                                                                                                                                                               lunos-MacBook-Pro.local: Sat Feb 16 12:34:25 2019
-
-ID                  NAME                  MODE                REPLICAS            IMAGE                                                 PORTS
-3hdab90uffab        swarm_filebeat        global              4/4                 docker.elastic.co/beats/filebeat:6.6.0
-b18qedtl68js        swarm_elasticsearch   replicated          2/2                 docker.elastic.co/elasticsearch/elasticsearch:6.6.0
-glbk960768i7        swarm_metricbeat      global              4/4                 docker.elastic.co/beats/metricbeat:6.6.0
-glmjj43pthla        swarm_proxy           replicated          1/1                 dockerflow/docker-flow-proxy:latest                   *:80->80/tcp, *:443->443/tcp, *:9200->9200/tcp
-px01x5v87h7x        swarm_kibana          replicated          1/1                 docker.elastic.co/kibana/kibana:6.6.0
-qkyzq7nsabk4        swarm_viz             replicated          1/1                 dockersamples/visualizer:latest
-sf6k7mwmb56z        swarm_listener        replicated          1/1                 dockerflow/docker-flow-swarm-listener:latest
-```
-
-### show stack service logs
-Use `make stack-logs [service-name-in-docker-compose-file]` to show log for each service.
-
-```
- $ make stack-logs metricbeat
-swarm_metricbeat.0.m7njtkxqpa0x@node-m    | 2019-02-16T03:12:23.888Z    INFO    instance/beat.go:616    Home path: [/usr/share/metricbeat] Config path: [/usr/share/metricbeat] Data path: [/usr/share/metricbeat/data] Logs path: [/usr/share/metricbeat/logs]
-swarm_metricbeat.0.m7njtkxqpa0x@node-m    | 2019-02-16T03:12:23.891Z    INFO    instance/beat.go:623    Beat UUID: 470be3df-9b80-4b26-a202-e06ed6d1edc4
-swarm_metricbeat.0.m7njtkxqpa0x@node-m    | 2019-02-16T03:12:23.891Z    INFO    [seccomp]       seccomp/seccomp.go:116  Syscall filter successfully installed
-swarm_metricbeat.0.m7njtkxqpa0x@node-m    | 2019-02-16T03:12:23.892Z    INFO    [beat]  instance/beat.go:936    Beat info       {"system_info": {"beat": {"path": {"config": "/usr/share/metricbeat", "data": "/usr/share/metricbeat/data", "home": "/usr/share/metricbeat", "logs": "/usr/share/metricbeat/logs"}, "type": "metricbeat", "uuid": "470be3df-9b80-4b26-a202-e06ed6d1edc4"}}}
-swarm_metricbeat.0.m7njtkxqpa0x@node-m    | 2019-02-16T03:12:23.892Z    INFO    [beat]  instance/beat.go:945    Build info      {"system_info": {"build": {"commit": "2c385a0764bdc537b6dc078a1d9bf11bb6d7bd95", "libbeat": "6.6.0", "time": "2019-01-24T10:38:21.000Z", "version": "6.6.0"}}}
-swarm_metricbeat.0.m7njtkxqpa0x@node-m    | 2019-02-16T03:12:23.892Z    INFO    [beat]  instance/beat.go:948    Go runtime info {"system_info": {"go": {"os":"linux","arch":"amd64","max_procs":1,"version":"go1.10.8"}}}
-swarm_metricbeat.0.m7njtkxqpa0x@node-m    | 2019-02-16T03:12:23.893Z    INFO    [beat]  instance/beat.go:952    Host info       {"system_info": {"host": {"architecture":"x86_64","boot_time":"2019-02-15T21:50:16Z","containerized":true,"name":"node-m-metricbeat","ip":["127.0.0.1/8","10.10.0.94/24","172.18.0.6/16"],"kernel_version":"4.14.98-boot2docker","mac":["02:42:0a:0a:00:5e","02:42:ac:12:00:06"],"os":{"family":"redhat","platform":"centos","name":"CentOS Linux","version":"7 (Core)","major":7,"minor":6,"patch":1810,"codename":"Core"},"timezone":"UTC","timezone_offset_sec":0}}}
-swarm_metricbeat.0.m7njtkxqpa0x@node-m    | 2019-02-16T03:12:23.893Z    INFO    [beat]  instance/beat.go:981    Process info    {"system_info": {"process": {"capabilities": {"inheritable":["chown","dac_override","fowner","fsetid","kill","setgid","setuid","setpcap","net_bind_service","net_raw","sys_chroot","mknod","audit_write","setfcap"],"permitted":["chown","dac_override","fowner","fsetid","kill","setgid","setuid","setpcap","net_bind_service","net_raw","sys_chroot","mknod","audit_write","setfcap"],"effective":["chown","dac_override","fowner","fsetid","kill","setgid","setuid","setpcap","net_bind_service","net_raw","sys_chroot","mknod","audit_write","setfcap"],"bounding":["chown","dac_override","fowner","fsetid","kill","setgid","setuid","setpcap","net_bind_service","net_raw","sys_chroot","mknod","audit_write","setfcap"],"ambient":null}, "cwd": "/usr/share/metricbeat", "exe": "/usr/share/metricbeat/metricbeat", "name": "metricbeat", "pid": 1, "ppid": 0, "seccomp": {"mode":"filter","no_new_privs":true}, "start_time": "2019-02-16T03:12:21.730Z"}}}
-swarm_metricbeat.0.m7njtkxqpa0x@node-m    | 2019-02-16T03:12:23.893Z    INFO    instance/beat.go:281    Setup Beat: metricbeat; Version: 6.6.0
-swarm_metricbeat.0.m7njtkxqpa0x@node-m    | 2019-02-16T03:12:23.900Z    INFO    elasticsearch/client.go:165     Elasticsearch url: http://elasticsearch:9200
-swarm_metricbeat.0.m7njtkxqpa0x@node-m    | 2019-02-16T03:12:23.904Z    INFO    [publisher]     pipeline/module.go:110  Beat name: node-m-metricbeat
-swarm_metricbeat.0.m7njtkxqpa0x@node-m    | 2019-02-16T03:12:23.904Z    WARN    [cfgwarn]       docker/docker.go:54     BETA: The docker autodiscover is beta
-swarm_metricbeat.0.m7njtkxqpa0x@node-m    | 2019-02-16T03:12:23.905Z    WARN    [cfgwarn]       hints/metrics.go:59     BETA: The hints builder is beta
-swarm_metricbeat.0.m7njtkxqpa0x@node-m    | 2019-02-16T03:12:23.909Z    INFO    elasticsearch/client.go:165     Elasticsearch url: http://elasticsearch:9200
-swarm_metricbeat.0.m7njtkxqpa0x@node-m    | 2019-02-16T03:12:23.912Z    INFO    [monitoring]    log/log.go:117  Starting metrics logging every 30s
-swarm_metricbeat.0.m7njtkxqpa0x@node-m    | 2019-02-16T03:12:23.928Z    INFO    elasticsearch/client.go:721     Connected to Elasticsearch version 6.6.0
-swarm_metricbeat.0.m7njtkxqpa0x@node-m    | 2019-02-16T03:12:23.928Z    INFO    kibana/client.go:118    Kibana url: http://kibana:5601
-swarm_metricbeat.0.m7njtkxqpa0x@node-m    | 2019-02-16T03:12:49.848Z    INFO    instance/beat.go:741    Kibana dashboards successfully loaded.
-swarm_metricbeat.0.m7njtkxqpa0x@node-m    | 2019-02-16T03:12:49.849Z    INFO    instance/beat.go:403    metricbeat start running.
-swarm_metricbeat.0.m7njtkxqpa0x@node-m    | 2019-02-16T03:12:49.874Z    INFO    filesystem/filesystem.go:58     Ignoring filesystem types: sysfs, rootfs, tmpfs, bdev, proc, cpuset, cgroup, cgroup2, devtmpfs, binfmt_misc, configfs, debugfs, tracefs, sockfs, dax, bpf, pipefs, ramfs, hugetlbfs, rpc_pipefs, devpts, nfs, nfs4, autofs, 9p, mqueue, selinuxfs, vboxsf, overlay
-swarm_metricbeat.0.m7njtkxqpa0x@node-m    | 2019-02-16T03:12:49.874Z    INFO    fsstat/fsstat.go:59     Ignoring filesystem types: sysfs, rootfs, tmpfs, bdev, proc, cpuset, cgroup, cgroup2, devtmpfs, binfmt_misc, configfs, debugfs, tracefs, sockfs, dax, bpf, pipefs, ramfs, hugetlbfs, rpc_pipefs, devpts, nfs, nfs4, autofs, 9p, mqueue, selinuxfs, vboxsf, overlay
-swarm_metricbeat.0.m7njtkxqpa0x@node-m    | 2019-02-16T03:12:49.926Z    INFO    autodiscover/autodiscover.go:104        Starting autodiscover manager
-swarm_metricbeat.0.m7njtkxqpa0x@node-m    | 2019-02-16T03:12:49.927Z    INFO    cfgfile/reload.go:150   Config reloader started
-```
-
-### delete stack
-```
-$ make stack-remove
-Removing service swarm_elasticsearch
-Removing service swarm_filebeat
-Removing service swarm_kibana
-Removing service swarm_listener
-Removing service swarm_metricbeat
-Removing service swarm_proxy
-Removing service swarm_viz
-```
-
-### delete the swarm volumes
-```
-$ make swarm-remove-volume
+$ make node-cleanup
 WARNING! This will remove all local volumes not used by at least one container.
 Are you sure you want to continue? [y/N] Deleted Volumes:
 swarm_kibana
