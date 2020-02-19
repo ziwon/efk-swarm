@@ -111,7 +111,7 @@ Removing service swarm_viz
 
 ### node-down
 ```
-$ make swarm-down
+$ make node-down
 About to remove node-1
 WARNING: This action will delete both local reference and remote instance.
 Successfully removed node-1
