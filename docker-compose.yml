@@ -48,7 +48,7 @@ services:
     environment:
       - LISTENER_ADDRESS=listener
       - MODE=swarm
-      - BIND_PORTS=9200
+      - BIND_PORTS=8200,9200
     deploy:
       placement:
         constraints:
@@ -62,7 +62,7 @@ services:
       - node.name={{.Node.Hostname}}-elasticsearch
       - discovery.seed_hosts=elasticsearch
       - cluster.name=es_cluster
-      - cluster.initial_master_nodes=node-2-elasticsearch,node-3-elasticsearch
+      - cluster.initial_master_nodes=node-3-elasticsearch
       - "ES_JAVA_OPTS=-Xms${ES_JVM_HEAP} -Xmx${ES_JVM_HEAP}"
       - network.host=0.0.0.0
       - xpack.security.enabled=false
@@ -74,7 +74,6 @@ services:
       - elasticsearch:/usr/share/elasticsearch/data
       - /sys/fs/cgroup:/sys/fs/cgroup:ro
     deploy:
-      #mode: 'global'
       endpoint_mode: dnsrr
       placement:
         constraints:
@@ -113,15 +112,18 @@ services:
         - com.df.srcPort=80
         - com.df.reqMode=http
 
-  apm-server:
+  apm_server:
     image: docker.elastic.co/apm/apm-server:${TAG:-6.5.4}
     environment:
+      - output.elasticsearch.enabled=true
       - output.elasticsearch.hosts=http://elasticsearch:9200
       - apm-server.host=0.0.0.0:8200
-      - apm-server.secret_token=xxVpmQB2HMzCL9PgBHVrnxjNXXw5J7bd79DFm6sjBJR5HPXDhcF8MSb3vv4bpg44
+      - apm-server.secret_token=0123456789ABCDEF
       - setup.kibana.host=kibana:5601
       - setup.template.enabled=true
       - logging.to_files=false
+    networks:
+      - overnet
     deploy:
       placement:
         constraints:
@@ -134,44 +136,17 @@ services:
         - com.df.srcPort=8200
         - com.df.reqMode=http
 
-  metricbeat:
-    image: docker.elastic.co/beats/metricbeat:${TAG:-6.5.4}
-    hostname: "{{.Node.Hostname}}-metricbeat"
-    user: root
+  fluent_bit:
+    image: fluent/fluent-bit:1.3
+    volumes:
+      - ./config/fluentbit/:/fluent-bit/etc/
+      - /var/lib/docker/containers/:/var/log/containers/:ro
     networks:
       - overnet
-    volumes:
-      - ./config/beats/metricbeat/metricbeat.yml:/usr/share/metricbeat/metricbeat.yml
-      - ./config/beats/metricbeat/modules.d/:/usr/share/metricbeat/modules.d/
-      - metricbeat:/usr/share/metricbeat/data
-      - /proc:/hostfs/proc:ro
-      - /sys/fs/cgroup:/hostfs/sys/fs/cgroup:ro
-      - /var/run/docker.sock:/var/run/docker.sock
-      - /:/hostfs:ro
-    command: >
-      sh -c "until curl -s -k http://kibana:5601; do echo \"Waiting for kibana..\"; sleep 2; done; \
-             metricbeat -e --strict.perms=false --system.hostfs=/hostfs"
     deploy:
-      mode: global
-
-  filebeat:
-    image: docker.elastic.co/beats/filebeat:${TAG:-6.5.4}
-    hostname: "{{.Node.Hostname}}-filebeat"
-    user: root
-    networks:
-      - overnet
-    volumes:
-      - ./config/beats/filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml
-      - ./config/beats/filebeat/modules.d/:/usr/share/filebeat/modules.d/
-      - filebeat:/usr/share/filebeat/data
-      - /var/run/docker.sock:/var/run/docker.sock
-      - /var/lib/docker/containers/:/var/lib/docker/containers/:ro
-      - /var/log/:/var/log/:ro
-    command: >
-      sh -c "until curl -s -k http://kibana:5601; do echo \"Waiting for kibana..\"; sleep 2; done; \
-             filebeat -e --strict.perms=false"
-    deploy:
-      mode: global
+      placement:
+        constraints:
+          - node.labels.frontend == true
 
 networks:
   overnet:

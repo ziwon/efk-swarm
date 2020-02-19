@@ -1,4 +1,6 @@
 #!/bin/sh
+#
+# Credits
 # https://gist.github.com/tombigel/d503800a282fcadbee14b537735d202c
 
 # These are the original gist links, linking to my gists now.
