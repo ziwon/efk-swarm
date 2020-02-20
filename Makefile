@@ -74,4 +74,17 @@ stack-reload:
 kibana:
 	open http://$(call get-node-ip, node-1)
 
+kibana-import-dashboard:
+	$(eval host=$(call get-node-ip, node-1))
+	echo "Import metricbeat dashboard...";
+	docker run --net="host" docker.elastic.co/beats/metricbeat:$(TAG) setup -e \
+		-E output.logstash.enabled=false \
+		-E output.elasticsearch.hosts=['$(host):9200'] \
+		-E setup.kibana.host=$(host):80; \
+	echo "Import filebeat dashboard...";
+	docker run --net="host" docker.elastic.co/beats/filebeat:$(TAG) setup -e \
+		-E output.logstash.enabled=false \
+		-E output.elasticsearch.hosts=['$(host):9200'] \
+		-E setup.kibana.host=$(host):80;
+
 .PHONY: node-env node-up node-down node-cleanup node-viz node-status stack-start stack-service stack-service-restart stack-ps stack-logs stack-stop kibana
