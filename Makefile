@@ -40,10 +40,23 @@ stack-start: node-env
 	docker stack deploy -c docker-compose.yml $(STACK_NAME)
 
 stack-service: node-env
-	docker stack services $(STACK_NAME)
+	watch docker stack services $(STACK_NAME)
+
+#ifeq (stack-service-restart,$(firstword $(MAKECMDGOALS)))
+  #SERVICE := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
+  #$(eval $(SERVICE):;@:)
+#endif
+#stack-service-restart: node-env
+	#svc=$(docker service ls | grep $(STACK_NAME)_$(SERVICE))
+	#if [[ ! -z  $$svc ]]; then \
+		#echo "Restarting service $(STACK_NAME)_$(SERVICE)"; \
+		#docker service rm $(STACK_NAME)_$(SERVICE); \
+	#else \
+		#echo "No such service: $(STACK_NAME)_$(SERVICE)"; \
+	#fi
 
 stack-ps: node-env
-	docker stack ps --no-trunc $(STACK_NAME)
+	watch docker stack ps --no-trunc $(STACK_NAME)
 
 ifeq (stack-logs,$(firstword $(MAKECMDGOALS)))
   SERVICE := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
@@ -56,9 +69,9 @@ stack-stop: node-env
 	docker stack rm $(STACK_NAME)
 
 stack-reload:
-	make stack-stop && make stack-start
+	make stack-stop && make node-cleanup && make stack-start
 
 kibana:
 	open http://$(call get-node-ip, node-1)
 
-.PHONY: node-env node-up node-down node-cleanup node-viz node-status stack-start stack-service stack-ps stack-logs stack-stop kibana
+.PHONY: node-env node-up node-down node-cleanup node-viz node-status stack-start stack-service stack-service-restart stack-ps stack-logs stack-stop kibana
