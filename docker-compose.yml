@@ -138,10 +138,27 @@ services:
         - com.df.srcPort=8200
         - com.df.reqMode=http
 
+  #fluentd:
+    #image: fluent/fluentd
+    #volumes:
+      #- ./config/fluentd:/fluentd/etc
+    #depends_on:
+      #- elasticsearch
+    #deploy:
+      #placement:
+        #constraints:
+          #- node.role == manager
+      #labels:
+        #- com.df.notify=true
+        #- com.df.distribute=true
+        #- com.df.servicePath=/
+        #- com.df.port=24224
+        #- com.df.srcPort=24224
+
   fluent_bit:
     image: fluent/fluent-bit:1.3
     volumes:
-      - ./config/fluentbit/:/fluent-bit/etc/
+      - ./config/fluentbit:/fluent-bit/etc
       - flog:/var/log
     networks:
       - overnet
@@ -151,9 +168,10 @@ services:
       placement:
         constraints:
           - node.labels.frontend == true
+
   flog:
     image: mingrammer/flog
-    command: "-l -t log -o /var/log/apache.log -b 10485760 -p 1048576 -s 1"
+    command: "-l -t log -o /var/log/apache.log -b 10485760 -p 1048576 -s 5"
     volumes:
       - flog:/var/log
     networks:
@@ -170,4 +188,5 @@ networks:
 volumes:
   elasticsearch:
   kibana:
+  fluentd:
   flog:

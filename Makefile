@@ -23,8 +23,11 @@ node-down:
 
 node-cleanup: node-env
 	for node in $$(docker node ls --format '{{.Hostname}}'); do \
-		eval $$(docker-machine env $$node); \
-		yes | docker volume prune; \
+		echo "Cleaning up $$node volume"; \
+		if [[ ! -z $$node ]]; then \
+			eval $$(docker-machine env $$node); \
+			yes | docker volume prune > /dev/null 2>&1; \
+		fi \
 	done
 
 node-viz:
@@ -51,6 +54,9 @@ stack-logs: node-env
 
 stack-stop: node-env
 	docker stack rm $(STACK_NAME)
+
+stack-reload:
+	make stack-stop && make stack-start
 
 kibana:
 	open http://$(call get-node-ip, node-1)
