@@ -87,4 +87,4 @@ kibana-import-dashboard:
 		-E output.elasticsearch.hosts=['$(host):9200'] \
 		-E setup.kibana.host=$(host):80;
 
-.PHONY: node-env node-up node-down node-cleanup node-viz node-status stack-start stack-service stack-service-restart stack-ps stack-logs stack-stop kibana
+.PHONY: node-env node-up node-down node-cleanup node-viz node-status stack-start stack-service stack-service-restart stack-ps stack-logs stack-stop kibana kibana-import-dashboard

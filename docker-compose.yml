@@ -42,7 +42,7 @@ services:
       - "80:80"             # kibana
       - "443:443"           # kibana https, don't use currently
       - "9200:9200"         # elasticsearch
-      - "2020:2020"         # fluent-bit http
+      - "2020:2020"         # fluent-bit (collector) http
       - "24224:24224"       # fluentd router
       - "8200:8200"         # apm server
     networks:
@@ -184,7 +184,7 @@ services:
 
   flog:
     image: mingrammer/flog
-    command: "-l -t log -w -o /var/log/apache.log -b 10485760 -p 1048576 -s 5"
+    command: "-l -t log -o /var/log/apache.log -s 5"
     volumes:
       - flog:/var/log
     networks:
