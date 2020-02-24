@@ -26,7 +26,7 @@ node-cleanup: node-env
 		echo "Cleaning up $$node volume"; \
 		if [[ ! -z $$node ]]; then \
 			eval $$(docker-machine env $$node); \
-			yes | docker volume prune > /dev/null 2>&1; \
+			docker-machine ssh $$node sh -c "docker volume prune > /dev/null 2>&1"; \
 		fi \
 	done
 
@@ -37,29 +37,32 @@ node-status: node-env
 	docker node ls
 
 stack-start: node-env
+	mkdir -p ./log
 	docker stack deploy -c docker-compose.yml $(STACK_NAME)
 
 stack-service: node-env
 	watch docker stack services $(STACK_NAME)
 
-#ifeq (stack-service-restart,$(firstword $(MAKECMDGOALS)))
-  #SERVICE := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
-  #$(eval $(SERVICE):;@:)
-#endif
-#stack-service-restart: node-env
-	#svc=$(docker service ls | grep $(STACK_NAME)_$(SERVICE))
-	#if [[ ! -z  $$svc ]]; then \
-		#echo "Restarting service $(STACK_NAME)_$(SERVICE)"; \
-		#docker service rm $(STACK_NAME)_$(SERVICE); \
-	#else \
-		#echo "No such service: $(STACK_NAME)_$(SERVICE)"; \
-	#fi
+ifeq (stack-service-restart,$(firstword $(MAKECMDGOALS)))
+  SERVICE:=$(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
+  $(eval $(SERVICE):;@:)
+endif
+stack-service-restart: node-env
+	eval $(env | grep DOCKER); cnt=`docker service ls | grep $(SERVICE) | wc -l`; \
+	if [[ -z $$cnt ]]; then \
+		echo "No such service: $(STACK_NAME)_$(SERVICE)"; \
+	else \
+		echo "Restart service: $(STACK_NAME)_$(SERVICE)"; \
+		docker service rm $(STACK_NAME)_$(SERVICE); \
+		[[ $(SERVICE) == flog ]] && rm -rf ./log/apache.log; \
+		docker stack deploy -c docker-compose.yml $(STACK_NAME); \
+	fi
 
 stack-ps: node-env
 	watch docker stack ps --no-trunc $(STACK_NAME)
 
 ifeq (stack-logs,$(firstword $(MAKECMDGOALS)))
-  SERVICE := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
+  SERVICE:=$(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
   $(eval $(SERVICE):;@:)
 endif
 stack-logs: node-env

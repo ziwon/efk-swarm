@@ -150,7 +150,7 @@ services:
     networks:
       - overnet
     depends_on:
-      - elasticsearch
+      - kibana
     deploy:
       placement:
         constraints:
@@ -166,11 +166,11 @@ services:
     image: fluent/fluent-bit:1.3
     volumes:
       - ./config/fluentbit:/fluent-bit/etc
-      - flog:/var/log
+      - ./log:/var/log
     networks:
       - overnet
     depends_on:
-      - elasticsearch
+      - kibana
     deploy:
       placement:
         constraints:
@@ -184,11 +184,13 @@ services:
 
   flog:
     image: mingrammer/flog
-    command: "-l -t log -o /var/log/apache.log -s 5"
+    command: "-t log -o /var/log/apache.log -n 1 -s 1 -l"
     volumes:
-      - flog:/var/log
+      - ./log:/var/log
     networks:
       - overnet
+    depends_on:
+      - kibana
     deploy:
       placement:
         constraints:
@@ -203,4 +205,3 @@ volumes:
   kibana:
   fluentd-root:
   fluentd-buffer:
-  flog:

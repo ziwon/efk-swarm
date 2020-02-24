@@ -1,10 +1,11 @@
-# beats-swarm
+# efk-swarm
+
+<img src="docs/images/before-and-after-using-fluentd.png">
 
 ## Visualizations
 
-<img src="images/swarm-viz.png" />
-<img src="images/metricbeats-system-dashboard.png" />
-<img src="images/metricbeats-container-dashboard.png" />
+<img src="docs/images/swarm-viz.png" />
+
 
 ## Usage
 
