@@ -1,5 +1,9 @@
 # efk-swarm
 
+[![asciicast](https://asciinema.org/a/304332.svg)](https://asciinema.org/a/304332)
+
+## Fluentd Architecture
+
 <img src="docs/images/before-and-after-using-fluentd.png">
 
 ## Visualizations
