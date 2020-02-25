@@ -6,7 +6,7 @@
 
 <img src="docs/images/before-and-after-using-fluentd.png">
 
-## Visualizations
+## Swarm Cluster
 
 <img src="docs/images/swarm-viz.png" />
 
